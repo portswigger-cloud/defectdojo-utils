@@ -1,6 +1,6 @@
 import pytest
 import logging
-import src.defectdojo_api as defectdojo_api
+import defectdojo.src.defectdojo_api as defectdojo_api
 
 
 @pytest.fixture
