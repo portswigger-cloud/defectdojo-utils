@@ -44,3 +44,7 @@ def main():
     active_findings_logger.info(f"{env_defect_dojo_product} has {findings} open")
 
     os.system(f"echo 'open_findings={findings}' >> $GITHUB_OUTPUT")
+
+
+if __name__ == "__main__":
+    main()
