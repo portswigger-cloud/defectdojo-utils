@@ -47,10 +47,12 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: install python dependencies
         id: install-python-dependencies
+        working-directory: defectdojo
         run: |
           python -m pip install --upgrade pip
           pip install tox tox-gh-actions
       - name: test
+        working-directory: defectdojo
         run: |
           tox
       - name: publish pytest report
@@ -58,11 +60,11 @@ jobs:
         if: always()
         uses: mikepenz/action-junit-report@v3
         with:
-          report_paths: reports/unit-test-*.xml
+          report_paths: defectdojo/reports/unit-test-*.xml
           require_tests: true
       - name: upload pytest-cov report
         if: always()
         uses: actions/upload-artifact@v3
         with:
           name: pytest-cov-report
-          path: reports/*pytest-cov*
+          path: defectdojo/reports/*pytest-cov*
