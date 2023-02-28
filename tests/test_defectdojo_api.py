@@ -1,3 +1,4 @@
+import json
 import pytest
 import logging
 import defectdojo.src.defectdojo_api as defectdojo_api
@@ -103,6 +104,13 @@ def finding_response_data_no_findings():
         "results": [],
         "prefetch": {},
     }
+
+
+@pytest.fixture
+def finding_response_data_findings():
+    with open("tests/data/findings.json") as json_file:
+        findings_data = json.load(json_file)
+        yield findings_data
 
 
 def test_retrieve_defectdojo_token_no_cert_success(
@@ -344,7 +352,6 @@ def test_number_of_open_findings_no_cert_success(
     finding_response_data_no_findings,
     logging_setup,
 ):
-    expected = 0
     mock_data = finding_response_data_no_findings
     mock_status_code = 200
     requests_mock.get(
@@ -352,10 +359,10 @@ def test_number_of_open_findings_no_cert_success(
         json=mock_data,
         status_code=mock_status_code,
     )
-    result = defectdojo_api.number_of_open_findings_defectdojo(
+    result = defectdojo_api.get_findings_defectdojo(
         logger=logging_setup, **setup_cert_data_no_cert, **setup_number_of_open_finding
     )
-    assert result == expected
+    assert result == finding_response_data_no_findings
 
 
 def test_number_of_open_findings_cert_success(
@@ -366,7 +373,6 @@ def test_number_of_open_findings_cert_success(
     finding_response_data_no_findings,
     logging_setup,
 ):
-    expected = 0
     mock_data = finding_response_data_no_findings
     mock_status_code = 200
     requests_mock.get(
@@ -374,10 +380,10 @@ def test_number_of_open_findings_cert_success(
         json=mock_data,
         status_code=mock_status_code,
     )
-    result = defectdojo_api.number_of_open_findings_defectdojo(
+    result = defectdojo_api.get_findings_defectdojo(
         logger=logging_setup, **setup_cert_data_cert, **setup_number_of_open_finding
     )
-    assert result == expected
+    assert result == finding_response_data_no_findings
 
 
 def test_number_of_open_findings_cert_fail_missing_cert(
@@ -396,7 +402,7 @@ def test_number_of_open_findings_cert_fail_missing_cert(
         status_code=mock_status_code,
     )
     with pytest.raises(SystemExit) as pytest_wrapped_e:
-        defectdojo_api.number_of_open_findings_defectdojo(
+        defectdojo_api.get_findings_defectdojo(
             logger=logging_setup,
             **setup_cert_data_cert_missing_cert,
             **setup_number_of_open_finding,
@@ -422,7 +428,7 @@ def test_number_of_open_findings_cert_fail_missing_key(
         status_code=mock_status_code,
     )
     with pytest.raises(SystemExit) as pytest_wrapped_e:
-        defectdojo_api.number_of_open_findings_defectdojo(
+        defectdojo_api.get_findings_defectdojo(
             logger=logging_setup,
             **setup_cert_data_cert_missing_key,
             **setup_number_of_open_finding,
@@ -445,7 +451,7 @@ def test_number_of_open_findings_no_cert_fail_server_side_error(
         status_code=mock_status_code,
     )
     with pytest.raises(SystemExit) as pytest_wrapped_e:
-        defectdojo_api.number_of_open_findings_defectdojo(
+        defectdojo_api.get_findings_defectdojo(
             logger=logging_setup,
             **setup_cert_data_no_cert,
             **setup_number_of_open_finding,
