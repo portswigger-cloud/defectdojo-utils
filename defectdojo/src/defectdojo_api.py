@@ -103,14 +103,14 @@ def import_scan_results_to_defectdojo(
         sys.exit(1)
 
 
-def number_of_open_findings_defectdojo(
+def get_findings_defectdojo(
     defect_dojo_product: str,
     defect_dojo_url: str,
     defect_dojo_token: str,
     client_certificate_file_path: str,
     client_key_file_path: str,
     logger: logging.Logger,
-) -> int:
+) -> dict:
     headers: dict = {
         "Authorization": f"Token {defect_dojo_token}",
     }
@@ -138,7 +138,7 @@ def number_of_open_findings_defectdojo(
         )
         sys.exit(1)
     if r.status_code == 200:
-        return json.loads(r.text)["count"]
+        return json.loads(r.text)
 
     else:
         logger.error(f"get open findings for product {defect_dojo_product} failed")

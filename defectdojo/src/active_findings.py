@@ -3,6 +3,8 @@
 import os
 import logging
 import defectdojo_api
+import github_actions
+from collections import Counter
 
 
 def main():
@@ -34,7 +36,7 @@ def main():
 
     active_findings_logger.info(f"querying findings for {env_defect_dojo_product}")
 
-    findings = defectdojo_api.number_of_open_findings_defectdojo(
+    findings = defectdojo_api.get_findings_defectdojo(
         defect_dojo_product=env_defect_dojo_product,
         defect_dojo_url=env_defect_dojo_url,
         defect_dojo_token=defect_dojo_api_token,
@@ -43,9 +45,26 @@ def main():
         logger=active_findings_logger,
     )
 
-    active_findings_logger.info(f"{env_defect_dojo_product} has {findings} open")
+    results = findings["results"]
+    severity_raw = []
+    for items in results:
+        severity_raw.append(items["severity"])
+    severity_sum = Counter(severity_raw)
 
-    os.system(f"echo 'open_findings={findings}' >> $GITHUB_OUTPUT")
+    findings_summary = {
+        "total": sum(severity_sum.values()),
+        "critical": severity_sum["Critical"],
+        "high": severity_sum["High"],
+        "medium": severity_sum["Medium"],
+        "low": severity_sum["Low"],
+        "info": severity_sum["Info"],
+    }
+
+    step_summary_data = findings_summary.copy()
+    step_summary_data["product"] = env_defect_dojo_product
+
+    github_actions.set_action_outputs(findings_summary)
+    github_actions.active_findings_markdown_step_summary(**step_summary_data)
 
 
 if __name__ == "__main__":
