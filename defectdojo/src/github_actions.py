@@ -1,7 +1,7 @@
 import os
 
-active_findings_markdown_summary_template = """## DefectDojo Findings Summary
-### Findings summary for {0}
+active_findings_markdown_summary_template = """## DefectDojo active security findings summary
+### {0}
 * __Total:__ {1}
 * __Critical:__ {2}
 * __High:__ {3}
