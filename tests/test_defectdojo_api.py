@@ -26,6 +26,7 @@ def setup_number_of_open_finding():
         "defect_dojo_product": "wobble product",
         "defect_dojo_token": "4e3d91c12f87a5de17488881fce619862f360d99",
         "defect_dojo_url": "https://defectdojo.example.com/",
+        "limit": 100,
     }
 
 

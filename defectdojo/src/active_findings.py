@@ -36,6 +36,15 @@ def main():
 
     active_findings_logger.info(f"querying findings for {env_defect_dojo_product}")
 
+    findings_count = defectdojo_api.get_findings_count_defectdojo(
+        defect_dojo_product=env_defect_dojo_product,
+        defect_dojo_url=env_defect_dojo_url,
+        defect_dojo_token=defect_dojo_api_token,
+        client_certificate_file_path=env_client_certificate_file_path,
+        client_key_file_path=env_client_key_file_path,
+        logger=active_findings_logger,
+    )
+
     findings = defectdojo_api.get_findings_defectdojo(
         defect_dojo_product=env_defect_dojo_product,
         defect_dojo_url=env_defect_dojo_url,
@@ -43,6 +52,7 @@ def main():
         client_certificate_file_path=env_client_certificate_file_path,
         client_key_file_path=env_client_key_file_path,
         logger=active_findings_logger,
+        limit=findings_count,
     )
 
     results = findings["results"]
