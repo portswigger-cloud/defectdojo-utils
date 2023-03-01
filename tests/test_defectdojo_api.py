@@ -5,14 +5,14 @@ import defectdojo.src.defectdojo_api as defectdojo_api
 
 
 @pytest.fixture
-def logging_setup():
+def logging_setup() -> pytest.fixture():
     logging.basicConfig(level="DEBUG")
     logger = logging.getLogger("PYTEST")
     return logger
 
 
 @pytest.fixture
-def setup_retrieve_defectdojo_token_data():
+def setup_retrieve_defectdojo_token_data() -> pytest.fixture():
     yield {
         "defect_dojo_url": "https://defectdojo.example.com/",
         "defect_dojo_username": "testuser",
@@ -21,17 +21,23 @@ def setup_retrieve_defectdojo_token_data():
 
 
 @pytest.fixture
-def setup_number_of_open_finding():
+def setup_number_of_count_finding() -> pytest.fixture():
     yield {
         "defect_dojo_product": "wobble product",
         "defect_dojo_token": "4e3d91c12f87a5de17488881fce619862f360d99",
         "defect_dojo_url": "https://defectdojo.example.com/",
-        "limit": 100,
     }
 
 
 @pytest.fixture
-def setup_cert_data_no_cert():
+def setup_summary_of_open_finding(setup_number_of_count_finding) -> pytest.fixture():
+    open_finding: dict = setup_number_of_count_finding.copy()
+    open_finding["limit"] = 100
+    yield open_finding
+
+
+@pytest.fixture
+def setup_cert_data_no_cert() -> pytest.fixture():
     yield {
         "client_certificate_file_path": None,
         "client_key_file_path": None,
@@ -39,7 +45,7 @@ def setup_cert_data_no_cert():
 
 
 @pytest.fixture
-def setup_cert_data_cert():
+def setup_cert_data_cert() -> pytest.fixture():
     yield {
         "client_certificate_file_path": "defectdojo_send_scan/tests/data/dummy.cert",
         "client_key_file_path": "defectdojo_send_scan/tests/data/dummy.key",
@@ -47,7 +53,7 @@ def setup_cert_data_cert():
 
 
 @pytest.fixture
-def setup_cert_data_cert_missing_key():
+def setup_cert_data_cert_missing_key() -> pytest.fixture():
     yield {
         "client_certificate_file_path": "defectdojo_send_scan/tests/data/dummy.cert",
         "client_key_file_path": None,
@@ -55,7 +61,7 @@ def setup_cert_data_cert_missing_key():
 
 
 @pytest.fixture
-def setup_cert_data_cert_missing_cert():
+def setup_cert_data_cert_missing_cert() -> pytest.fixture():
     yield {
         "client_certificate_file_path": None,
         "client_key_file_path": "defectdojo_send_scan/tests/data/dummy.key",
@@ -63,7 +69,7 @@ def setup_cert_data_cert_missing_cert():
 
 
 @pytest.fixture
-def setup_send_scan_results_to_defectdojo_data():
+def setup_send_scan_results_to_defectdojo_data() -> pytest.fixture():
     yield {
         "defect_dojo_product_type": "wibble team",
         "defect_dojo_product": "wobble product",
@@ -77,27 +83,27 @@ def setup_send_scan_results_to_defectdojo_data():
 
 
 @pytest.fixture
-def defectdojo_url():
+def defectdojo_url() -> pytest.fixture():
     yield "https://defectdojo.example.com/"
 
 
 @pytest.fixture
-def retrieve_defectdojo_token_api_endpoint(defectdojo_url):
+def retrieve_defectdojo_token_api_endpoint(defectdojo_url) -> pytest.fixture():
     yield f"{defectdojo_url}api/v2/api-token-auth/"
 
 
 @pytest.fixture
-def send_scan_results_to_defectdojo_api_endpoint(defectdojo_url):
+def send_scan_results_to_defectdojo_api_endpoint(defectdojo_url) -> pytest.fixture():
     yield f"{defectdojo_url}api/v2/import-scan/"
 
 
 @pytest.fixture
-def findings_defectdojo_api_endpoint(defectdojo_url):
+def findings_defectdojo_api_endpoint(defectdojo_url) -> pytest.fixture():
     yield f"{defectdojo_url}api/v2/findings/"
 
 
 @pytest.fixture
-def finding_response_data_no_findings():
+def finding_response_data_no_findings() -> pytest.fixture():
     yield {
         "count": 0,
         "next": "null",
@@ -108,7 +114,7 @@ def finding_response_data_no_findings():
 
 
 @pytest.fixture
-def finding_response_data_findings():
+def finding_response_data_findings() -> pytest.fixture():
     with open("tests/data/findings.json") as json_file:
         findings_data = json.load(json_file)
         yield findings_data
@@ -345,10 +351,10 @@ def test_send_scan_results_to_defectdojo_cert_fail_missing_cert(
     assert pytest_wrapped_e.value.code == 1
 
 
-def test_number_of_open_findings_no_cert_success(
+def test_count_open_findings_no_cert_success(
     requests_mock,
     setup_cert_data_no_cert,
-    setup_number_of_open_finding,
+    setup_number_of_count_finding,
     findings_defectdojo_api_endpoint,
     finding_response_data_no_findings,
     logging_setup,
@@ -360,16 +366,112 @@ def test_number_of_open_findings_no_cert_success(
         json=mock_data,
         status_code=mock_status_code,
     )
-    result = defectdojo_api.get_findings_defectdojo(
-        logger=logging_setup, **setup_cert_data_no_cert, **setup_number_of_open_finding
+    result = defectdojo_api.get_findings_count_defectdojo(
+        logger=logging_setup, **setup_cert_data_no_cert, **setup_number_of_count_finding
     )
-    assert result == finding_response_data_no_findings
+    assert result == 0
 
 
-def test_number_of_open_findings_cert_success(
+def test_count_open_findings_cert_success(
     requests_mock,
     setup_cert_data_cert,
-    setup_number_of_open_finding,
+    setup_number_of_count_finding,
+    findings_defectdojo_api_endpoint,
+    finding_response_data_no_findings,
+    logging_setup,
+):
+    mock_data = finding_response_data_no_findings
+    mock_status_code = 200
+    requests_mock.get(
+        findings_defectdojo_api_endpoint,
+        json=mock_data,
+        status_code=mock_status_code,
+    )
+    result = defectdojo_api.get_findings_count_defectdojo(
+        logger=logging_setup, **setup_cert_data_cert, **setup_number_of_count_finding
+    )
+    assert result == 0
+
+
+def test_count_open_findings_cert_fail_missing_cert(
+    requests_mock,
+    setup_cert_data_cert_missing_cert,
+    setup_number_of_count_finding,
+    findings_defectdojo_api_endpoint,
+    finding_response_data_no_findings,
+    logging_setup,
+):
+    mock_data = finding_response_data_no_findings
+    mock_status_code = 200
+    requests_mock.get(
+        findings_defectdojo_api_endpoint,
+        json=mock_data,
+        status_code=mock_status_code,
+    )
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        defectdojo_api.get_findings_count_defectdojo(
+            logger=logging_setup,
+            **setup_cert_data_cert_missing_cert,
+            **setup_number_of_count_finding,
+        )
+
+    assert pytest_wrapped_e.type == SystemExit
+    assert pytest_wrapped_e.value.code == 1
+
+
+def test_count_open_findings_cert_fail_missing_key(
+    requests_mock,
+    setup_cert_data_cert_missing_key,
+    setup_number_of_count_finding,
+    findings_defectdojo_api_endpoint,
+    finding_response_data_no_findings,
+    logging_setup,
+):
+    mock_data = finding_response_data_no_findings
+    mock_status_code = 200
+    requests_mock.get(
+        findings_defectdojo_api_endpoint,
+        json=mock_data,
+        status_code=mock_status_code,
+    )
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        defectdojo_api.get_findings_count_defectdojo(
+            logger=logging_setup,
+            **setup_cert_data_cert_missing_key,
+            **setup_number_of_count_finding,
+        )
+
+    assert pytest_wrapped_e.type == SystemExit
+    assert pytest_wrapped_e.value.code == 1
+
+
+def test_count_open_findings_no_cert_fail_server_side_error(
+    requests_mock,
+    setup_cert_data_no_cert,
+    setup_number_of_count_finding,
+    findings_defectdojo_api_endpoint,
+    logging_setup,
+):
+    mock_status_code = 500
+    requests_mock.get(
+        findings_defectdojo_api_endpoint,
+        status_code=mock_status_code,
+    )
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        defectdojo_api.get_findings_count_defectdojo(
+            logger=logging_setup,
+            **setup_cert_data_no_cert,
+            **setup_number_of_count_finding,
+        )
+
+    assert pytest_wrapped_e.type == SystemExit
+    assert pytest_wrapped_e.value.code == 1
+
+
+def test_get_findings_no_cert_success(
+    requests_mock,
+    setup_cert_data_no_cert,
+    setup_summary_of_open_finding,
     findings_defectdojo_api_endpoint,
     finding_response_data_no_findings,
     logging_setup,
@@ -382,15 +484,36 @@ def test_number_of_open_findings_cert_success(
         status_code=mock_status_code,
     )
     result = defectdojo_api.get_findings_defectdojo(
-        logger=logging_setup, **setup_cert_data_cert, **setup_number_of_open_finding
+        logger=logging_setup, **setup_cert_data_no_cert, **setup_summary_of_open_finding
     )
     assert result == finding_response_data_no_findings
 
 
-def test_number_of_open_findings_cert_fail_missing_cert(
+def test_get_findings_cert_success(
+    requests_mock,
+    setup_cert_data_cert,
+    setup_summary_of_open_finding,
+    findings_defectdojo_api_endpoint,
+    finding_response_data_no_findings,
+    logging_setup,
+):
+    mock_data = finding_response_data_no_findings
+    mock_status_code = 200
+    requests_mock.get(
+        findings_defectdojo_api_endpoint,
+        json=mock_data,
+        status_code=mock_status_code,
+    )
+    result = defectdojo_api.get_findings_defectdojo(
+        logger=logging_setup, **setup_cert_data_cert, **setup_summary_of_open_finding
+    )
+    assert result == finding_response_data_no_findings
+
+
+def test_get_findings_cert_fail_missing_cert(
     requests_mock,
     setup_cert_data_cert_missing_cert,
-    setup_number_of_open_finding,
+    setup_summary_of_open_finding,
     findings_defectdojo_api_endpoint,
     finding_response_data_no_findings,
     logging_setup,
@@ -406,17 +529,17 @@ def test_number_of_open_findings_cert_fail_missing_cert(
         defectdojo_api.get_findings_defectdojo(
             logger=logging_setup,
             **setup_cert_data_cert_missing_cert,
-            **setup_number_of_open_finding,
+            **setup_summary_of_open_finding,
         )
 
     assert pytest_wrapped_e.type == SystemExit
     assert pytest_wrapped_e.value.code == 1
 
 
-def test_number_of_open_findings_cert_fail_missing_key(
+def test_get_findings_cert_fail_missing_key(
     requests_mock,
     setup_cert_data_cert_missing_key,
-    setup_number_of_open_finding,
+    setup_summary_of_open_finding,
     findings_defectdojo_api_endpoint,
     finding_response_data_no_findings,
     logging_setup,
@@ -432,17 +555,17 @@ def test_number_of_open_findings_cert_fail_missing_key(
         defectdojo_api.get_findings_defectdojo(
             logger=logging_setup,
             **setup_cert_data_cert_missing_key,
-            **setup_number_of_open_finding,
+            **setup_summary_of_open_finding,
         )
 
     assert pytest_wrapped_e.type == SystemExit
     assert pytest_wrapped_e.value.code == 1
 
 
-def test_number_of_open_findings_no_cert_fail_server_side_error(
+def test_get_findings_no_cert_fail_server_side_error(
     requests_mock,
     setup_cert_data_no_cert,
-    setup_number_of_open_finding,
+    setup_summary_of_open_finding,
     findings_defectdojo_api_endpoint,
     logging_setup,
 ):
@@ -455,7 +578,7 @@ def test_number_of_open_findings_no_cert_fail_server_side_error(
         defectdojo_api.get_findings_defectdojo(
             logger=logging_setup,
             **setup_cert_data_no_cert,
-            **setup_number_of_open_finding,
+            **setup_summary_of_open_finding,
         )
 
     assert pytest_wrapped_e.type == SystemExit

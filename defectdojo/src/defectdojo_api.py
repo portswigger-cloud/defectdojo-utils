@@ -3,6 +3,8 @@ import json
 import sys
 import logging
 
+requests_timeout = 120
+
 
 def retrieve_defectdojo_token(
     defect_dojo_url: str,
@@ -22,14 +24,14 @@ def retrieve_defectdojo_token(
             data=data,
             verify=True,
             cert=(client_certificate_file_path, client_key_file_path),
-            timeout=30,
+            timeout=requests_timeout,
         )
     elif not client_certificate_file_path and not client_key_file_path:
         r = requests.post(
             api_endpoint,
             data=data,
             verify=True,
-            timeout=30,
+            timeout=requests_timeout,
         )
     else:
         logger.error(
@@ -84,7 +86,7 @@ def import_scan_results_to_defectdojo(
             data=data,
             verify=True,
             cert=(client_certificate_file_path, client_key_file_path),
-            timeout=30,
+            timeout=requests_timeout,
         )
     elif not client_certificate_file_path and not client_key_file_path:
         r = requests.post(
@@ -93,7 +95,7 @@ def import_scan_results_to_defectdojo(
             files=files,
             data=data,
             verify=True,
-            timeout=30,
+            timeout=requests_timeout,
         )
     else:
         logger.error(
@@ -127,7 +129,7 @@ def get_findings_count_defectdojo(
             headers=headers,
             verify=True,
             cert=(client_certificate_file_path, client_key_file_path),
-            timeout=30,
+            timeout=requests_timeout,
         )
 
     elif not client_certificate_file_path and not client_key_file_path:
@@ -135,7 +137,7 @@ def get_findings_count_defectdojo(
             api_endpoint,
             headers=headers,
             verify=True,
-            timeout=30,
+            timeout=requests_timeout,
         )
 
     else:
@@ -172,7 +174,7 @@ def get_findings_defectdojo(
             headers=headers,
             verify=True,
             cert=(client_certificate_file_path, client_key_file_path),
-            timeout=30,
+            timeout=requests_timeout,
         )
 
     elif not client_certificate_file_path and not client_key_file_path:
@@ -180,7 +182,7 @@ def get_findings_defectdojo(
             api_endpoint,
             headers=headers,
             verify=True,
-            timeout=30,
+            timeout=requests_timeout,
         )
 
     else:
