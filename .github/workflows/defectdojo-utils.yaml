@@ -1,4 +1,4 @@
-name: static tests
+name: defectdojo utils
 on:
   push:
     branches:
