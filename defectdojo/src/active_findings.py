@@ -1,10 +1,52 @@
 #!/usr/bin/env python3
 
 import os
+import sys
 import logging
 import defectdojo_api
 import github_actions
 from collections import Counter
+
+
+def findings_thresholds(active_findings: dict, findings_thresholds: dict) -> bool:
+    threshold_exceeded_count = 0
+    if active_findings["total"] > findings_thresholds["total"]:
+        github_actions.total_findings_threshold_markdown_step_summary(
+            active_findings["total"], findings_thresholds["total"]
+        )
+        threshold_exceeded_count + 1
+
+    if active_findings["critical"] > findings_thresholds["critical"]:
+        github_actions.severity_findings_threshold_markdown_step_summary(
+            "critical", active_findings["critical"], findings_thresholds["critical"]
+        )
+        threshold_exceeded_count + 1
+
+    if active_findings["high"] > findings_thresholds["high"]:
+        github_actions.severity_findings_threshold_markdown_step_summary(
+            "high", active_findings["high"], findings_thresholds["high"]
+        )
+        threshold_exceeded_count + 1
+
+    if active_findings["medium"] > findings_thresholds["medium"]:
+        github_actions.severity_findings_threshold_markdown_step_summary(
+            "medium", active_findings["medium"], findings_thresholds["medium"]
+        )
+        threshold_exceeded_count + 1
+
+    if active_findings["low"] > findings_thresholds["low"]:
+        github_actions.severity_findings_threshold_markdown_step_summary(
+            "low", active_findings["low"], findings_thresholds["low"]
+        )
+        threshold_exceeded_count + 1
+
+    if active_findings["info"] > findings_thresholds["info"]:
+        github_actions.severity_findings_threshold_markdown_step_summary(
+            "info", active_findings["info"], findings_thresholds["info"]
+        )
+        threshold_exceeded_count + 1
+    if threshold_exceeded_count > 0:
+        sys.exit(2)
 
 
 def main():
@@ -18,6 +60,9 @@ def main():
     env_defect_dojo_product = os.getenv("DEFECT_DOJO_PRODUCT", None)
     env_client_certificate_file_path = os.getenv("CLIENT_CERTIFICATE_FILE_PATH", None)
     env_client_key_file_path = os.getenv("CLIENT_KEY_FILE_PATH", None)
+    env_create_github_outputs = os.getenv("CREATE_GITHUB_OUTPUTS", True)
+    env_create_github_step_summary = os.getenv("CREATE_GITHUB_STEP_SUMMARY", True)
+    env_enable_thresholds = os.getenv("ENABLE_THRESHOLDS", False)
 
     active_findings_logger.info(
         f"requesting authentication token from {env_defect_dojo_url}"
@@ -72,9 +117,20 @@ def main():
 
     step_summary_data = findings_summary.copy()
     step_summary_data["product"] = env_defect_dojo_product
-
-    github_actions.set_action_outputs(findings_summary)
-    github_actions.active_findings_markdown_step_summary(**step_summary_data)
+    if env_create_github_outputs:
+        github_actions.set_action_outputs(findings_summary)
+    if env_create_github_step_summary:
+        github_actions.active_findings_markdown_step_summary(**step_summary_data)
+    if env_enable_thresholds:
+        env_thresholds = {
+            "total": os.getenv("TOTAL_THRESHOLD", None),
+            "critical": os.getenv("CRITICAL_THRESHOLD", None),
+            "high": os.getenv("HIGH_THRESHOLD", None),
+            "medium": os.getenv("MEDIUM_THRESHOLD", None),
+            "low": os.getenv("LOW_THRESHOLD", None),
+            "info": os.getenv("INFO_THRESHOLD", None),
+        }
+        findings_thresholds(findings_summary, env_thresholds)
 
 
 if __name__ == "__main__":

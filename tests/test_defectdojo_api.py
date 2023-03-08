@@ -1,14 +1,40 @@
-import json
 import pytest
 import logging
 import defectdojo.src.defectdojo_api as defectdojo_api
 
 
 @pytest.fixture
+def create_scan_results_file(tmp_path):
+    directory = tmp_path / "results"
+    directory.mkdir()
+    path = directory / "results.json"
+    path.write_text("dummy_results = {}")
+    yield path
+
+
+@pytest.fixture
+def create_cert_file(tmp_path):
+    directory = tmp_path / "cert"
+    directory.mkdir()
+    path = directory / "test.cert"
+    path.write_text("dummy_cert")
+    yield path
+
+
+@pytest.fixture
+def create_key_file(tmp_path):
+    directory = tmp_path / "key"
+    directory.mkdir()
+    path = directory / "test.key"
+    path.write_text("dummy_key")
+    yield path
+
+
+@pytest.fixture
 def logging_setup() -> pytest.fixture():
     logging.basicConfig(level="DEBUG")
     logger = logging.getLogger("PYTEST")
-    return logger
+    yield logger
 
 
 @pytest.fixture
@@ -45,31 +71,33 @@ def setup_cert_data_no_cert() -> pytest.fixture():
 
 
 @pytest.fixture
-def setup_cert_data_cert() -> pytest.fixture():
+def setup_cert_data_cert(create_cert_file, create_key_file) -> pytest.fixture():
     yield {
-        "client_certificate_file_path": "defectdojo_send_scan/tests/data/dummy.cert",
-        "client_key_file_path": "defectdojo_send_scan/tests/data/dummy.key",
+        "client_certificate_file_path": create_cert_file,
+        "client_key_file_path": create_key_file,
     }
 
 
 @pytest.fixture
-def setup_cert_data_cert_missing_key() -> pytest.fixture():
+def setup_cert_data_cert_missing_key(create_cert_file) -> pytest.fixture():
     yield {
-        "client_certificate_file_path": "defectdojo_send_scan/tests/data/dummy.cert",
+        "client_certificate_file_path": create_cert_file,
         "client_key_file_path": None,
     }
 
 
 @pytest.fixture
-def setup_cert_data_cert_missing_cert() -> pytest.fixture():
+def setup_cert_data_cert_missing_cert(create_key_file) -> pytest.fixture():
     yield {
         "client_certificate_file_path": None,
-        "client_key_file_path": "defectdojo_send_scan/tests/data/dummy.key",
+        "client_key_file_path": create_key_file,
     }
 
 
 @pytest.fixture
-def setup_send_scan_results_to_defectdojo_data() -> pytest.fixture():
+def setup_send_scan_results_to_defectdojo_data(
+    create_scan_results_file,
+) -> pytest.fixture():
     yield {
         "defect_dojo_product_type": "wibble team",
         "defect_dojo_product": "wobble product",
@@ -78,7 +106,7 @@ def setup_send_scan_results_to_defectdojo_data() -> pytest.fixture():
         "defect_dojo_engagement_name": "wibble engagement",
         "defect_dojo_url": "https://defectdojo.example.com/",
         "defect_dojo_token": "4e3d91c12f87a5de17488881fce619862f360d99",
-        "scan_results_file_path": "tests/data/dummy_scan_data.js",
+        "scan_results_file_path": create_scan_results_file,
     }
 
 
@@ -111,13 +139,6 @@ def finding_response_data_no_findings() -> pytest.fixture():
         "results": [],
         "prefetch": {},
     }
-
-
-@pytest.fixture
-def finding_response_data_findings() -> pytest.fixture():
-    with open("tests/data/findings.json") as json_file:
-        findings_data = json.load(json_file)
-        yield findings_data
 
 
 def test_retrieve_defectdojo_token_no_cert_success(
