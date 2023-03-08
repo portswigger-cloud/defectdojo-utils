@@ -2,7 +2,7 @@
 
 import os
 import logging
-import defectdojo_api
+import defectdojo.src.defectdojo_api as defectdojo_api
 
 
 def main():
