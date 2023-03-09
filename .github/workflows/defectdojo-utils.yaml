@@ -68,6 +68,11 @@ jobs:
         with:
           report_paths: reports/unit-test-*.xml
           require_tests: true
+      - name: publish pytest-cov report
+        if: always()
+        uses: orgoro/coverage@v3
+        with:
+          coverageFile: reports/*pytest-cov*
       - name: upload pytest-cov report
         if: always()
         uses: actions/upload-artifact@v3
