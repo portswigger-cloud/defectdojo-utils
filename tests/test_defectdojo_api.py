@@ -103,17 +103,6 @@ def findings_defectdojo_api_endpoint(defectdojo_url) -> pytest.fixture():
     yield f"{defectdojo_url}api/v2/findings/"
 
 
-@pytest.fixture
-def finding_response_data_no_findings() -> pytest.fixture():
-    yield {
-        "count": 0,
-        "next": "null",
-        "previous": "null",
-        "results": [],
-        "prefetch": {},
-    }
-
-
 def test_retrieve_defectdojo_token_no_cert_success(
     requests_mock,
     setup_cert_data_no_cert,
