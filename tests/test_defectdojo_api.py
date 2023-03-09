@@ -4,33 +4,6 @@ import defectdojo.src.defectdojo_api as defectdojo_api
 
 
 @pytest.fixture
-def create_scan_results_file(tmp_path):
-    directory = tmp_path / "results"
-    directory.mkdir()
-    path = directory / "results.json"
-    path.write_text("dummy_results = {}")
-    yield path
-
-
-@pytest.fixture
-def create_cert_file(tmp_path):
-    directory = tmp_path / "cert"
-    directory.mkdir()
-    path = directory / "test.cert"
-    path.write_text("dummy_cert")
-    yield path
-
-
-@pytest.fixture
-def create_key_file(tmp_path):
-    directory = tmp_path / "key"
-    directory.mkdir()
-    path = directory / "test.key"
-    path.write_text("dummy_key")
-    yield path
-
-
-@pytest.fixture
 def logging_setup() -> pytest.fixture():
     logging.basicConfig(level="DEBUG")
     logger = logging.getLogger("PYTEST")
