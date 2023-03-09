@@ -3,50 +3,10 @@
 import os
 import sys
 import logging
-import defectdojo_api
-import github_actions
 from collections import Counter
-
-
-def findings_thresholds(active_findings: dict, findings_thresholds: dict) -> bool:
-    threshold_exceeded_count = 0
-    if active_findings["total"] > findings_thresholds["total"]:
-        github_actions.total_findings_threshold_markdown_step_summary(
-            active_findings["total"], findings_thresholds["total"]
-        )
-        threshold_exceeded_count + 1
-
-    if active_findings["critical"] > findings_thresholds["critical"]:
-        github_actions.severity_findings_threshold_markdown_step_summary(
-            "critical", active_findings["critical"], findings_thresholds["critical"]
-        )
-        threshold_exceeded_count + 1
-
-    if active_findings["high"] > findings_thresholds["high"]:
-        github_actions.severity_findings_threshold_markdown_step_summary(
-            "high", active_findings["high"], findings_thresholds["high"]
-        )
-        threshold_exceeded_count + 1
-
-    if active_findings["medium"] > findings_thresholds["medium"]:
-        github_actions.severity_findings_threshold_markdown_step_summary(
-            "medium", active_findings["medium"], findings_thresholds["medium"]
-        )
-        threshold_exceeded_count + 1
-
-    if active_findings["low"] > findings_thresholds["low"]:
-        github_actions.severity_findings_threshold_markdown_step_summary(
-            "low", active_findings["low"], findings_thresholds["low"]
-        )
-        threshold_exceeded_count + 1
-
-    if active_findings["info"] > findings_thresholds["info"]:
-        github_actions.severity_findings_threshold_markdown_step_summary(
-            "info", active_findings["info"], findings_thresholds["info"]
-        )
-        threshold_exceeded_count + 1
-    if threshold_exceeded_count > 0:
-        sys.exit(2)
+import defectdojo.src.defectdojo_api as defectdojo_api
+import defectdojo.src.github_actions as github_actions
+import defectdojo.src.findings_thresholds as findings_thresholds
 
 
 def main():
@@ -130,7 +90,11 @@ def main():
             "low": os.getenv("LOW_THRESHOLD", None),
             "info": os.getenv("INFO_THRESHOLD", None),
         }
-        findings_thresholds(findings_summary, env_thresholds)
+        failed_threshold = findings_thresholds.evaluate_thresholds(
+            findings_summary, env_thresholds
+        )
+        if failed_threshold is True:
+            sys.exit(2)
 
 
 if __name__ == "__main__":
