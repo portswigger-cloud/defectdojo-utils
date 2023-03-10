@@ -137,7 +137,7 @@ def main():
         sys.exit(2)
     elif failed_threshold is False:
         findings_thresholds_logger.info(
-            f"thresholds for active findings for {env_defect_dojo_product} has not been exceeded"
+            f"The thresholds for active findings for {env_defect_dojo_product} haven't been exceeded"
         )
 
 
