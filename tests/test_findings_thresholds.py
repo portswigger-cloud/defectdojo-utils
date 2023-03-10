@@ -1,5 +1,5 @@
 import pytest
-import defectdojo.src.findings_thresholds as findings_thresholds
+import findings_thresholds
 
 
 @pytest.fixture

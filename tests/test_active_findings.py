@@ -1,6 +1,6 @@
 import os
 import pytest
-import defectdojo.src.active_findings as active_findings
+import active_findings
 
 
 @pytest.fixture

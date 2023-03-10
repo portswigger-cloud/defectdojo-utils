@@ -1,4 +1,4 @@
-import defectdojo.src.import_scan_results as import_scan_results
+import import_scan_results
 
 
 def test_main_no_cert(

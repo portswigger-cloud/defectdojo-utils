@@ -1,6 +1,6 @@
 import os
 import pytest
-import defectdojo.src.github_actions as github_actions
+import github_actions
 
 
 @pytest.fixture
