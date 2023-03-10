@@ -1,28 +1,24 @@
 #!/usr/bin/env python3
 
-import os
-import sys
 import logging
 from collections import Counter
+import collect_common_data
 import defectdojo_api
 import github_actions
-import findings_thresholds
 
 
 def main():
-    log_level = os.getenv("DEVSECOPS_TOOLS_LOG_LEVEL", "INFO")
-    logging.basicConfig(level=log_level)
+    env_vars = collect_common_data.get_common_env_vars()
+    log_level = env_vars["log_level"]
+    env_defect_dojo_url = env_vars["env_defect_dojo_url"]
+    env_defect_dojo_username = env_vars["env_defect_dojo_username"]
+    env_defect_dojo_password = env_vars["env_defect_dojo_password"]
+    env_defect_dojo_product = env_vars["env_defect_dojo_product"]
+    env_client_certificate_file_path = env_vars["env_client_certificate_file_path"]
+    env_client_key_file_path = env_vars["env_client_key_file_path"]
 
+    logging.basicConfig(level=log_level)
     active_findings_logger = logging.getLogger("defectdojo_active_findings")
-    env_defect_dojo_url = os.getenv("DEFECT_DOJO_URL", None)
-    env_defect_dojo_username = os.getenv("DEFECT_DOJO_USERNAME", None)
-    env_defect_dojo_password = os.getenv("DEFECT_DOJO_PASSWORD", None)
-    env_defect_dojo_product = os.getenv("DEFECT_DOJO_PRODUCT", None)
-    env_client_certificate_file_path = os.getenv("CLIENT_CERTIFICATE_FILE_PATH", None)
-    env_client_key_file_path = os.getenv("CLIENT_KEY_FILE_PATH", None)
-    env_create_github_outputs = os.getenv("CREATE_GITHUB_OUTPUTS", True)
-    env_create_github_step_summary = os.getenv("CREATE_GITHUB_STEP_SUMMARY", True)
-    env_enable_thresholds = os.getenv("ENABLE_THRESHOLDS", False)
 
     active_findings_logger.info(
         f"requesting authentication token from {env_defect_dojo_url}"
@@ -77,24 +73,8 @@ def main():
 
     step_summary_data = findings_summary.copy()
     step_summary_data["product"] = env_defect_dojo_product
-    if env_create_github_outputs:
-        github_actions.set_action_outputs(findings_summary)
-    if env_create_github_step_summary:
-        github_actions.active_findings_markdown_step_summary(**step_summary_data)
-    if env_enable_thresholds:
-        env_thresholds = {
-            "total": os.getenv("TOTAL_THRESHOLD", None),
-            "critical": os.getenv("CRITICAL_THRESHOLD", None),
-            "high": os.getenv("HIGH_THRESHOLD", None),
-            "medium": os.getenv("MEDIUM_THRESHOLD", None),
-            "low": os.getenv("LOW_THRESHOLD", None),
-            "info": os.getenv("INFO_THRESHOLD", None),
-        }
-        failed_threshold = findings_thresholds.evaluate_thresholds(
-            findings_summary, env_thresholds
-        )
-        if failed_threshold is True:
-            sys.exit(2)
+    github_actions.set_action_outputs(findings_summary)
+    github_actions.active_findings_markdown_step_summary(**step_summary_data)
 
 
 if __name__ == "__main__":

@@ -423,7 +423,7 @@ def findings_response_with_data():
     }
 
 
-def test_main_defaults(
+def test_main_no_findings(
     mocker,
     defect_dojo_url_env_var,
     defect_dojo_username_env_var,
@@ -455,15 +455,12 @@ def test_main_defaults(
     assert result is None
 
 
-def test_main_failed_thresholds_false(
+def test_main_with_findings(
     mocker,
     defect_dojo_url_env_var,
     defect_dojo_username_env_var,
     defect_dojo_password_env_var,
     defect_dojo_product_env_var,
-    env_create_github_outputs_false_env_var,
-    env_create_github_step_summary_false_env_var,
-    env_enable_thresholds_true_env_var,
     findings_response_with_data,
 ):
     mocker.patch(
@@ -479,41 +476,12 @@ def test_main_failed_thresholds_false(
         return_value=findings_response_with_data,
     )
     mocker.patch(
-        "defectdojo.src.active_findings.findings_thresholds.evaluate_thresholds",
-        return_value=False,
+        "defectdojo.src.active_findings.github_actions.set_action_outputs",
+        return_value=None,
+    )
+    mocker.patch(
+        "defectdojo.src.active_findings.github_actions.active_findings_markdown_step_summary",
+        return_value=None,
     )
     result = active_findings.main()
     assert result is None
-
-
-def test_main_failed_thresholds_true(
-    mocker,
-    defect_dojo_url_env_var,
-    defect_dojo_username_env_var,
-    defect_dojo_password_env_var,
-    defect_dojo_product_env_var,
-    env_create_github_outputs_false_env_var,
-    env_create_github_step_summary_false_env_var,
-    env_enable_thresholds_true_env_var,
-    findings_response_with_data,
-):
-    mocker.patch(
-        "defectdojo.src.active_findings.defectdojo_api.retrieve_defectdojo_token",
-        return_value="d11dc2d650168f488e6143b6fa428483fbc7de29",
-    )
-    mocker.patch(
-        "defectdojo.src.active_findings.defectdojo_api.get_findings_count_defectdojo",
-        return_value=0,
-    )
-    mocker.patch(
-        "defectdojo.src.active_findings.defectdojo_api.get_findings_defectdojo",
-        return_value=findings_response_with_data,
-    )
-    mocker.patch(
-        "defectdojo.src.active_findings.findings_thresholds.evaluate_thresholds",
-        return_value=True,
-    )
-    with pytest.raises(SystemExit) as pytest_wrapped_e:
-        active_findings.main()
-    assert pytest_wrapped_e.type == SystemExit
-    assert pytest_wrapped_e.value.code == 2
