@@ -1,4 +1,4 @@
-import defectdojo.src.github_actions as github_actions
+import github_actions
 
 
 def evaluate_thresholds(active_findings: dict, findings_thresholds: dict) -> bool:

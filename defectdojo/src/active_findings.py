@@ -4,9 +4,9 @@ import os
 import sys
 import logging
 from collections import Counter
-import defectdojo.src.defectdojo_api as defectdojo_api
-import defectdojo.src.github_actions as github_actions
-import defectdojo.src.findings_thresholds as findings_thresholds
+import defectdojo_api
+import github_actions
+import findings_thresholds
 
 
 def main():
