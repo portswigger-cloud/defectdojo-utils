@@ -17,24 +17,24 @@ def setup_active_findings():
 @pytest.fixture
 def setup_findings_thresholds_exceeded():
     yield {
-        "total": 5,
-        "critical": 1,
-        "high": 1,
-        "medium": 1,
-        "low": 1,
-        "info": 1,
+        "total": "5",
+        "critical": "1",
+        "high": "1",
+        "medium": "1",
+        "low": "1",
+        "info": "1",
     }
 
 
 @pytest.fixture
 def setup_findings_thresholds_not_exceeded():
     yield {
-        "total": 20,
-        "critical": 4,
-        "high": 4,
-        "medium": 4,
-        "low": 4,
-        "info": 4,
+        "total": "20",
+        "critical": "4",
+        "high": "4",
+        "medium": "4",
+        "low": "4",
+        "info": "4",
     }
 
 
