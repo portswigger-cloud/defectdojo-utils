@@ -10,4 +10,6 @@ RUN chmod a+x src/import_scan_results.py
 
 RUN chmod a+x src/active_findings.py
 
+RUN chmod a+x src/findings_thresholds.py
+
 WORKDIR /usr/defectdojo-utils/src
