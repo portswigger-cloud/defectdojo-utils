@@ -129,11 +129,16 @@ def main():
         "low": env_vars["low"],
         "info": env_vars["info"],
     }
+    active_findings_logger.info("checking thresholds")
     failed_threshold = findings_thresholds.evaluate_thresholds(
         findings_summary, env_thresholds
     )
     if failed_threshold is True:
         sys.exit(2)
+    elif failed_threshold is False:
+        active_findings_logger.info(
+            f"thresholds for active findings for {env_defect_dojo_product} has not been exceeded"
+        )
 
 
 if __name__ == "__main__":
