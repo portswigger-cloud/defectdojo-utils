@@ -65,9 +65,9 @@ def main():
     env_client_key_file_path = env_vars["env_client_key_file_path"]
 
     logging.basicConfig(level=log_level)
-    active_findings_logger = logging.getLogger("defectdojo_active_findings")
+    findings_thresholds_logger = logging.getLogger("defectdojo_findings_thresholds")
 
-    active_findings_logger.info(
+    findings_thresholds_logger.info(
         f"requesting authentication token from {env_defect_dojo_url}"
     )
 
@@ -77,12 +77,12 @@ def main():
         defect_dojo_password=env_defect_dojo_password,
         client_certificate_file_path=env_client_certificate_file_path,
         client_key_file_path=env_client_key_file_path,
-        logger=active_findings_logger,
+        logger=findings_thresholds_logger,
     )
 
-    active_findings_logger.info("authentication token retrieved successfully")
+    findings_thresholds_logger.info("authentication token retrieved successfully")
 
-    active_findings_logger.info(f"querying findings for {env_defect_dojo_product}")
+    findings_thresholds_logger.info(f"querying findings for {env_defect_dojo_product}")
 
     findings_count = defectdojo_api.get_findings_count_defectdojo(
         defect_dojo_product=env_defect_dojo_product,
@@ -90,7 +90,7 @@ def main():
         defect_dojo_token=defect_dojo_api_token,
         client_certificate_file_path=env_client_certificate_file_path,
         client_key_file_path=env_client_key_file_path,
-        logger=active_findings_logger,
+        logger=findings_thresholds_logger,
     )
 
     findings = defectdojo_api.get_findings_defectdojo(
@@ -99,7 +99,7 @@ def main():
         defect_dojo_token=defect_dojo_api_token,
         client_certificate_file_path=env_client_certificate_file_path,
         client_key_file_path=env_client_key_file_path,
-        logger=active_findings_logger,
+        logger=findings_thresholds_logger,
         limit=findings_count,
     )
 
@@ -129,14 +129,14 @@ def main():
         "low": env_vars["low"],
         "info": env_vars["info"],
     }
-    active_findings_logger.info("checking thresholds")
+    findings_thresholds_logger.info("checking thresholds")
     failed_threshold = findings_thresholds.evaluate_thresholds(
         findings_summary, env_thresholds
     )
     if failed_threshold is True:
         sys.exit(2)
     elif failed_threshold is False:
-        active_findings_logger.info(
+        findings_thresholds_logger.info(
             f"thresholds for active findings for {env_defect_dojo_product} has not been exceeded"
         )
 
