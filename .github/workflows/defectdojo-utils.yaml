@@ -107,3 +107,9 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+  
+  post-to-a-slack-channel:
+    if: ${{ failure() }}
+    uses: portswigger-cloud/github-actions/.github/workflows/shared-slack-notifier.yaml@main
+    needs: build-and-push-image
+    secrets: inherit
