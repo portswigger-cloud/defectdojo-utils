@@ -110,6 +110,6 @@ jobs:
   
   post-to-a-slack-channel-on-failure:
     if: ${{ failure() }}
-    uses: ./.github/workflows/post-to-a-slack-channel-on-failure.yaml
+    uses: ./.github/workflows/shared-on-fail-slack-notifier.yaml
     needs: build-and-push-image
     secrets: inherit
