@@ -13,7 +13,7 @@ on:
 
 jobs:
   post-to-a-slack-channel-on-failure:
-    name: post to a slack channel
+    name: post to a slack channel on build failure
     runs-on: ubuntu-latest
     permissions:
       id-token: write
