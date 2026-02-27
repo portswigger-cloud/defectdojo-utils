@@ -29,7 +29,7 @@ jobs:
       - name: upload semgrep results
         id: upload-semgrep-results
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: semgrep-results
           path: semgrep/results/
@@ -70,7 +70,7 @@ jobs:
           require_tests: true
       - name: upload pytest-cov report
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: pytest-cov-report
           path: reports/*pytest-cov*
