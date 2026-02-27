@@ -72,7 +72,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: pytest-cov-report
+          name: pytest-cov-report-${{ matrix.python-version }}
           path: reports/*pytest-cov*
 
   build-and-push-image:
